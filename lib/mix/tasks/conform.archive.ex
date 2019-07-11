@@ -22,7 +22,7 @@ defmodule Mix.Tasks.Conform.Archive do
       {[], []} ->
         {:ok, "", []}
       {_, _}   ->
-        specified_deps = Mix.Dep.loaded(env: Mix.env)
+        specified_deps = Mix.Dep.load_and_cache()
         # collect deps which are specifed outside of deps,
         # like: [:name, path: "path_to_lib"]
         deps_paths =
