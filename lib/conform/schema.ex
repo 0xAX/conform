@@ -151,6 +151,7 @@ defmodule Conform.Schema do
 
   # Ignore the documentation block if one is present
   defp from(quoted, path) when is_list(quoted) do
+    :io.format("aaaag ~p~n", [path])
     # Load imports from archive if present
     archive_path = String.replace(path, ".exs", ".ez")
     load_archive(archive_path)
@@ -420,6 +421,8 @@ defmodule Conform.Schema do
   defp convert_to_datatype(_, v), do: v
 
   defp valid_import?(i) when is_atom(i) do
+    :io.format("import: ~p~n", [i])
+    :io.format("libdir ~p~n", [:code.lib_dir()])
     case :code.lib_dir(i) do
       {:error, _} -> false
       path when is_list(path) -> true
@@ -430,6 +433,8 @@ defmodule Conform.Schema do
   defp get_extends_schema(app_name, src_schema_path) do
     # Attempt loading from deps if Mix is available
     schema_path = try do
+
+      :io.format("aaa ~p~n", [Mix.Dep.load_and_cache()])
       paths = Mix.Dep.load_and_cache()
               |> Enum.filter(fn %Mix.Dep{app: app} -> app == app_name end)
               |> Enum.map(fn %Mix.Dep{opts: opts} ->
@@ -445,6 +450,7 @@ defmodule Conform.Schema do
     catch
       _,_ -> nil
     end
+
     # Next try locating by application
     schema_path = case schema_path do
       nil ->
@@ -459,17 +465,22 @@ defmodule Conform.Schema do
         end
       path when is_binary(path) ->
         path
-    end
+                  end
+    :io.format("schema_path ~p~n", [src_schema_path])
+    :io.format("app_name ~p~n", [app_name])
     schema_path = case schema_path == nil || File.exists?(schema_path) == false do
       true ->
         # If that fails, try loading from archive, if present
         archive_path = String.replace(src_schema_path, ".exs", ".ez")
+
+        :io.format("search for archive ~p~n", [archive_path])
         case File.exists?(archive_path) do
           false -> nil
           true  ->
             case :erl_prim_loader.list_dir('#{archive_path}') do
               :error -> nil
               {:ok, apps} ->
+                :io.format("apps ~p~n", [apps])
                 case '#{app_name}' in apps do
                   true  -> Path.join([archive_path, "#{app_name}", "config", "#{app_name}.schema.exs"])
                   false -> nil

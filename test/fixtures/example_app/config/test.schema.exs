@@ -1,5 +1,5 @@
 [
-  import:  [:fake_app],
+  import:  [:conform],
   extends: [:fake_app],
   mappings: [
     "test.env": [
@@ -24,7 +24,7 @@
   transforms: [
     "test.another_val": fn conf ->
       case Conform.Conf.get(conf, "test.another_val") do
-        [{_, val}] -> FakeApp.inc_val_test(val)
+        [{_, val}] -> val#FakeApp.inc_val_test(val)
         []  -> nil
       end
     end

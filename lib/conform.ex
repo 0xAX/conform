@@ -84,7 +84,7 @@ defmodule Conform do
     end
   end
 
-  defp process(%Options{} = options) do
+  defp process(%Options{} = options) do    
     # Read .conf and .schema.exs
     final = case Conform.Conf.from_file(options.conf) do
       {:error, reason} when is_binary(reason) ->
