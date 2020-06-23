@@ -149,7 +149,7 @@ defmodule Conform.ReleasePlugin do
       end
     end)
 
-    {:ok, tmp_dir} = Mix.Releases.Utils.insecure_mkdir_temp
+    {:ok, tmp_dir} = insecure_mkdir_temp()
     schema = Conform.Schema.coalesce(schemas)
 
     tmp_schema_src = Path.join(tmp_dir, "#{release.name}.schema.exs")
@@ -175,7 +175,7 @@ defmodule Conform.ReleasePlugin do
       end
     end)
 
-    {:ok, tmp_dir} = Mix.Releases.Utils.insecure_mkdir_temp
+    {:ok, tmp_dir} = insecure_mkdir_temp()
     conf = Enum.join(conf_files, "\n")
 
     tmp_conf_src = Path.join(tmp_dir, "#{release.name}.conf")
@@ -194,6 +194,36 @@ defmodule Conform.ReleasePlugin do
       |> extract_umbrella
       |> filter_umbrella(config[:apps])
       |> Map.new
+    end
+  end
+
+  @doc """
+  Creates a temporary directory with a random name in a canonical
+  temporary files directory of the current system
+  (i.e. `/tmp` on *NIX or `./tmp` on Windows)
+  Returns an ok tuple with the path of the temp directory, or an error
+  tuple with the reason it failed.
+  """
+  @spec insecure_mkdir_temp() :: {:ok, String.t()} | {:error, term}
+  def insecure_mkdir_temp() do
+    :rand.seed(:exs64)
+    unique_num = :rand.uniform(1_000_000_000)
+
+    tmpdir_path =
+      case :erlang.system_info(:system_architecture) do
+        'win32' ->
+          Path.join(["./tmp", ".tmp_dir#{unique_num}"])
+
+        _ ->
+          Path.join(["/tmp", ".tmp_dir#{unique_num}"])
+      end
+
+    case File.mkdir_p(tmpdir_path) do
+      :ok ->
+        {:ok, tmpdir_path}
+
+      {:error, reason} ->
+        {:error, {:mkdir_temp, :file, reason}}
     end
   end
 

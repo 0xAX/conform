@@ -37,7 +37,7 @@ defmodule Conform.Mixfile do
 
   defp deps do
     [{:neotoma, "~> 1.7.3"},
-     {:ex_doc, "~> 0.13", only: :dev}]
+     {:ex_doc, "~> 0.22.1", only: :dev}]
   end
 
   defp description, do: "Easy, powerful, and extendable configuration tooling for releases."
